@@ -57,3 +57,11 @@ class ArticleAnalysis(models.Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     class Meta:
         table = "article_analyses"
+        
+
+class BotState(models.Model):
+    key = fields.CharField(max_length=255, uniqie=True)
+    value = fields.TextField()
+    
+    class Meta:
+        table = "bot_state"
