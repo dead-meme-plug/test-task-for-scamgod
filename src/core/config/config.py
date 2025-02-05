@@ -9,6 +9,9 @@ class Config(ABC):
         self.config = None
         self.config_path = config_path
         
+    async def load(self):
+        self.config = await self._load_config(self.config_path)
+        
     async def _load_config(self, config_path: str) -> dict:
         try:
             async with aiofiles.open(config_path, 'r', encoding='utf-8') as f:
