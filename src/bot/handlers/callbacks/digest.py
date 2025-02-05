@@ -1,5 +1,6 @@
 from aiogram import Router
 from aiogram.types import CallbackQuery
+from src.bot.buttons.menu import get_digest_menu
 
 router = Router()
 
