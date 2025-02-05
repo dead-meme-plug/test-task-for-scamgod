@@ -1,11 +1,11 @@
 import asyncio
 import logging
-from aiogram.fsm.storage.memory import MemoryStorage
+import sys
 
-from src.core.config.config import BotConfig
-from src.bot.bot import TGBot
-from src.services.api_fetcher import APIFetcher
-from src.services.news_fetcher import NewsFetcher
+from core.config.config import BotConfig
+from bot.bot import TGBot
+from services.api_fetcher import APIFetcher
+from services.news_fetcher import NewsFetcher
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,7 +13,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def change_event_loop():
+    if sys.platform == "win32":
+        import winloop
+        winloop.install()
+        logger.info("Используется winloop")
+
 async def main():
+    change_event_loop()
     config = BotConfig("src/core/config/config.toml")
     bot = TGBot(config.telegram_bot_token)
     api_fetcher = APIFetcher(config.newsapi_key)
