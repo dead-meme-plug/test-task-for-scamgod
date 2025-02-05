@@ -1,5 +1,6 @@
 from aiogram import Router
 from aiogram.types import CallbackQuery
+from src.bot.buttons.menu import get_subscription_manager_menu
 
 router = Router()
 
