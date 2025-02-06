@@ -38,3 +38,29 @@ def get_digest_menu() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="Назад", callback_data="main_menu")
         ]
     ])
+
+def get_admin_menu() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Статистика", callback_data="admin_statistics")
+        ],
+        [
+            InlineKeyboardButton(text="Пользователи", callback_data="admin_users")
+        ],
+        [
+            InlineKeyboardButton(text="Назад", callback_data="main_menu")
+        ]
+    ])
+
+def get_user_management_menu() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Забанить пользователя", callback_data="admin_ban_user")
+        ],
+        [
+            InlineKeyboardButton(text="Выдать/отнять админку", callback_data="admin_toggle_admin")
+        ],
+        [
+            InlineKeyboardButton(text="Назад", callback_data="admin_panel")
+        ]
+    ])

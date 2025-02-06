@@ -9,6 +9,8 @@ class User(models.Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     last_active = fields.DatetimeField(auto_now=True)
     is_admin = fields.BooleanField(default=False)
+    is_banned = fields.BooleanField(default=False)
+    ban_expires_at = fields.DatetimeField(null=True)
     
     subscriptions: fields.ReverseRelation["Subscription"]
     received_articles: fields.ManyToManyRelation["Article"]
@@ -37,6 +39,7 @@ class Article(models.Model):
     published_at = fields.DatetimeField()
     content = fields.TextField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
+    topics = fields.JSONField(default=list)
 
     users: fields.ManyToManyRelation[User] = fields.ManyToManyField(
         "models.User", related_name="received_articles", through="user_articles"

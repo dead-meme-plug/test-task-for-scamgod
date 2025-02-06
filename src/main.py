@@ -6,6 +6,7 @@ from core.config.config import BotConfig
 from bot.bot import TGBot
 from services.api_fetcher import APIFetcher
 from services.news_fetcher import NewsFetcher
+from core.database.db import init_db, close_db
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,11 +23,19 @@ def change_event_loop():
 async def main():
     change_event_loop()
     config = BotConfig("src/core/config/config.toml")
-    bot = TGBot(config.telegram_bot_token)
+    await config.load()
+    await init_db(config)
     api_fetcher = APIFetcher(config.newsapi_key)
-    news_fetcher = NewsFetcher(api_fetcher, bot.bot)
-    asyncio.create_task(news_fetcher.start())
-    await bot.start()
+    bot = TGBot(config.telegram_bot_token, api_fetcher)
+    
+    try:
+        await bot.start()
+    finally:
+        await bot.stop() 
+        await close_db()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    finally:
+        asyncio.run(close_db())

@@ -7,4 +7,5 @@ class DigestStates(StatesGroup):
     waiting_for_period = State()
 
 class AdminStates(StatesGroup):
-    pass
+    waiting_for_ban_details = State()
+    waiting_for_user_id = State() 

@@ -15,7 +15,8 @@ class Config(ABC):
     async def _load_config(self, config_path: str) -> dict:
         try:
             async with aiofiles.open(config_path, 'r', encoding='utf-8') as f:
-                return toml.load(f)
+                config_content = await f.read()
+                return toml.loads(config_content)
         except FileNotFoundError:
             raise FileNotFoundError(f'Файл конфига не найден: {config_path}')
         except toml.TomlDecodeError as e:
@@ -44,3 +45,6 @@ class BotConfig(Config):
     def newsapi_key(self) -> str:
         return self.get("NEWS", "NEWSAPI_KEY")
     
+    @property
+    def database_url(self) -> str:
+        return self.get("DATABASE", "URL", "sqlite://db.sqlite3")
