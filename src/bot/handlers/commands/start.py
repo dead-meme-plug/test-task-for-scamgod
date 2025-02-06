@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
+from datetime import datetime
 
 from bot.buttons.menu import get_main_menu
 from core.database.models import User
@@ -17,6 +18,9 @@ async def start_handler(message: Message):
             "last_name": message.from_user.last_name,
         }
     )
+    
+    user.last_active = datetime.now()
+    await user.save()
     
     await message.answer(
         "Выберите действие:",
