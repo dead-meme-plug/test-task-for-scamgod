@@ -31,6 +31,13 @@
    ```bash
    pip install -r requirements.txt
    ```
+   ```bash
+   python -m textblob.download_corpora
+   ```
+   ```
+   python -m spacy download ru_core_news_sm
+   ```
+   
 
 3. **Настройте конфиг:**
 Поменяйте токены для API в пути `/src/core/config/config.toml
