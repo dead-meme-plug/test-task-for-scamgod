@@ -1,6 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from typing import Dict, Any
+from datetime import datetime
 
 from bot.buttons.menu import get_digest_menu, get_main_menu
 from core.database.models import User
@@ -63,6 +64,8 @@ async def digest_month_handler(callback: CallbackQuery):
     
 @router.callback_query(F.data == "main_menu")
 async def back_to_main_menu_handler(callback: CallbackQuery):
+    user = await User.get(id=callback.from_user.id)
+    user.last_active = datetime.now()
     await callback.message.edit_text(
         "Выберите действие:",
         reply_markup=get_main_menu()
@@ -70,10 +73,9 @@ async def back_to_main_menu_handler(callback: CallbackQuery):
     await callback.answer()
 
 def _format_digest(digest: Dict[str, Any]) -> str:
-    result = []
-    
+    result = ["<b>📰 Ваш дайджест за месяц:</b>\n"]
     for topic, articles in digest["grouped_articles"].items():
-        result.append(f"📌 <b>{topic}</b>:")
+        result.append(f"<b>📌 {topic}:</b>")
         for article in articles:
             title = article['title']
             url = article['url']
@@ -84,9 +86,9 @@ def _format_digest(digest: Dict[str, Any]) -> str:
     if analysis:
         keywords = analysis.get("keywords", [])
         if isinstance(keywords, str):
-            keywords = keywords.split(", ")  
-        result.append(f"<b>Ключевые слова</b>: {', '.join(keywords[:5])}")
+            keywords = keywords.split(", ")
+        result.append(f"<b>Ключевые слова:</b> {', '.join(keywords[:5])}")
         sentiment = analysis.get('sentiment', 0.0)
-        result.append(f"<b>Сентиментальность</b>: {sentiment:.2f}")
+        result.append(f"<b>Сентиментальность:</b> {sentiment:.2f}")
     
     return "\n".join(result)
