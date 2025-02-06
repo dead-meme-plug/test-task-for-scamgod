@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-from core.database.models import User, Article, Subscription
+from core.database.models import User, Article, Subscription, ArticleAnalysis
 from services.text_analyzer import TextAnalyzer
 
 class DigestGenerator:
@@ -61,7 +61,19 @@ class DigestGenerator:
         if not articles:
             return {}
 
-        all_text = " ".join(article.title + " " + (article.content or "") for article in articles)
+        all_text = ""
+        for article in articles:
+            if not await ArticleAnalysis.filter(article=article).exists():
+                analysis = self.text_analyzer.analyze_article(article.content or article.title)
+                await ArticleAnalysis.create(
+                    article=article,
+                    keywords=analysis["keywords"],
+                    sentiment=analysis["sentiment"],
+                    word_frequencies=analysis["word_frequencies"],
+                    lemmatized_text=analysis["lemmatized_text"]
+                )
+            all_text += " " + (article.content or article.title)
+
         keywords = self.text_analyzer.extract_keywords(all_text, top_n=10)
         sentiment = self.text_analyzer.analyze_sentiment(all_text)
 
@@ -69,3 +81,4 @@ class DigestGenerator:
             "keywords": keywords,
             "sentiment": sentiment
         }
+        

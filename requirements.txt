@@ -1,0 +1,7 @@
+aiogram
+spacy
+tortoise-orm
+newsapi-python
+winloop
+toml
+textblob

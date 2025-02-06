@@ -11,6 +11,7 @@ class User(models.Model):
     is_admin = fields.BooleanField(default=False)
     is_banned = fields.BooleanField(default=False)
     ban_expires_at = fields.DatetimeField(null=True)
+    is_active = fields.BooleanField(default=True)
     
     subscriptions: fields.ReverseRelation["Subscription"]
     received_articles: fields.ManyToManyRelation["Article"]
@@ -63,8 +64,7 @@ class ArticleAnalysis(models.Model):
         
 
 class BotState(models.Model):
-    key = fields.CharField(max_length=255, uniqie=True)
-    value = fields.TextField()
-    
+    id = fields.IntField(pk=True)
+    last_news_fetch_time = fields.DatetimeField(null=True)
     class Meta:
         table = "bot_state"

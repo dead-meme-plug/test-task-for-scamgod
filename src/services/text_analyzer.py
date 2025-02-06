@@ -1,6 +1,7 @@
 import spacy
 from typing import List, Dict
 from collections import Counter
+from textblob import TextBlob
 
 class TextAnalyzer:
     
@@ -12,16 +13,17 @@ class TextAnalyzer:
         keywords = [
             token.lemma_.lower() for token in doc 
             if not token.is_stop and not token.is_punct and not token.is_space
+            and token.pos_ != "PROPN"
         ]
         return [word for word, _ in Counter(keywords).most_common(top_n)]
     
+    def extract_keywords_from_title(self, title: str, top_n: int = 5) -> List[str]:
+        return self.extract_keywords(title, top_n)
+    
     def analyze_sentiment(self, text: str) -> float:
-        doc = self.nlp(text)
-        sentiment = 0
-        for token in doc:
-            if token.sentiment != 0:
-                sentiment += token.sentiment
-        return sentiment / len(doc) if len(doc) > 0 else 0
+        blob = TextBlob(text)
+        sentiment = blob.sentiment.polarity
+        return sentiment
     
     def get_word_frequencies(self, text: str) -> Dict[str, int]:
         doc = self.nlp(text)

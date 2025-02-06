@@ -61,7 +61,7 @@ class StatisticsService(IStatisticsService):
         }
 
     async def _get_active_users_count(self) -> int:
-        active_threshold = datetime.now() - timedelta(days=30)
+        active_threshold = datetime.now() - timedelta(days=7)
         return await User.filter(last_active__gte=active_threshold).count()
 
     async def _get_most_popular_topics(self, limit: int = 5) -> List[Dict[str, Any]]:

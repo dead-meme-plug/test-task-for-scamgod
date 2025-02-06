@@ -3,6 +3,7 @@ from utils.dataclasses import Article
 from typing import Optional, List, Dict
 from datetime import datetime
 import logging
+from services.text_analyzer import TextAnalyzer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -11,8 +12,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 class APIFetcher:
     
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, text_analyzer: TextAnalyzer):
         self.client = NewsApiClient(api_key)
+        self.text_analyzer = text_analyzer
         try:
             response = self.client.get_sources()
             if response.get('status') != 'ok':
@@ -21,48 +23,6 @@ class APIFetcher:
         except Exception as e:
             logger.error(f"Ошибка при подключении к API: {e}")
             raise
-        
-    async def fetch_articles(
-        self,
-        query: str,
-        sources: Optional[List[str]] = None,
-        domains: Optional[List[str]] = None,
-        from_date: Optional[datetime] = None,
-        to_date: Optional[datetime] = None,
-        language: str = 'ru',
-        sort_by: str = 'publishedAt',
-        page_size: int = 100
-    ) -> List[Article]:
-        
-        try:
-            logger.info(f"Запрос статей: query={query}, from_date={from_date}, to_date={to_date}")
-            response = self.client.get_top_headlines(
-                q=query if query else None,
-                sources=','.join(sources) if sources else None,
-                domains=','.join(domains) if domains else None,
-                from_param=from_date.isoformat() if from_date else None,
-                to=to_date.isoformat() if to_date else None,
-                language=language,
-                sort_by=sort_by,
-                page_size=page_size
-            )
-            logger.info(f"Получено {len(response['articles'])} статей.")
-            return [
-                Article(
-                    source=article['source']['name'],
-                    author=article.get('author'),
-                    title=article['title'],
-                    description=article.get('description'),
-                    url=article['url'],
-                    url_to_image=article.get('urlToImage'),
-                    published_at=datetime.fromisoformat(article['publishedAt']),
-                    content=article.get('content')
-                )
-                for article in response['articles']
-            ]
-        except Exception as e:
-            logger.error(f"Ошибка при получении статей: {e}")
-            return []
 
     async def fetch_news(self) -> List[Dict]:
         try:
@@ -86,6 +46,10 @@ class APIFetcher:
             
             articles = response.get('articles', [])
             logger.info(f"Received {len(articles)} articles")
+            
+            for article in articles:
+                text = article["title"] + " " + (article.get("content", "") or "")
+                article["topics"] = self.text_analyzer.extract_topics(text)
             return articles
         except Exception as e:
             logger.error(f"Ошибка при фетчинге новостей: {str(e)}", exc_info=True)

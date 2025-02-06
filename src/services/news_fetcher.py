@@ -47,29 +47,29 @@ class NewsFetcher:
         logger.info(f"Processing {len(articles)} new articles")
         await self._save_articles(articles)
         await self._notify_users(articles)
-        await self._save_last_fetch_time(datetime.now())
 
     async def _save_articles(self, articles: List[Dict]):
         for article in articles:
-            topics = self.text_analyzer.extract_topics(article["title"] + " " + (article["content"] or ""))
+            keywords = self.text_analyzer.extract_keywords_from_title(article["title"])
+            published_at = article["publishedAt"].rstrip("Z")
             await Article.create(
                 title=article["title"],
-                content=article["content"],
-                source=article["source"],
+                content=article.get("content"),
+                source=article["source"]["name"],
                 url=article["url"],
-                published_at=article["publishedAt"],
-                topics=topics
+                published_at=datetime.fromisoformat(published_at),
+                keywords=keywords
             )
 
     async def _notify_users(self, articles: List[Dict]):
         for article in articles:
-            subscriptions = await Subscription.filter(topic__in=article["topics"], is_active=True).prefetch_related("user")
+            topics = self.text_analyzer.extract_topics(article["title"] + " " + (article.get("content", "") or ""))
+            subscriptions = await Subscription.filter(topic__in=topics, is_active=True).prefetch_related("user")
             for subscription in subscriptions:
                 await self.bot.send_message(
                     chat_id=subscription.user.id,
                     text=f"Новая статья по вашей подписке '{subscription.topic}':\n\n{article['title']}\n{article['url']}"
                 )
-
     async def _load_last_fetch_time(self) -> datetime:
         state = await BotState.get_or_none(key="last_fetch_time")
         if state:

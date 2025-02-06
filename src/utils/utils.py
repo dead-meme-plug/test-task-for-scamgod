@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from datetime import datetime
 
-from core.database.models import User
+from core.database.models import User, BotState
 
 async def is_admin(user_id: int) -> bool:
     user = await User.get(id=user_id)

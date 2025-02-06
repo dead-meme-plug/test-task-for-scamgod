@@ -32,6 +32,8 @@ async def get_digest_handler(callback: CallbackQuery):
 async def digest_week_handler(callback: CallbackQuery):
     user = await User.get(id=callback.from_user.id)
     digest = await digest_generator.generate_digest(user.id, days=7)
+    user.last_active = datetime.now()
+    await user.save()
     
     if "message" in digest:
         await callback.message.edit_text(
@@ -49,7 +51,8 @@ async def digest_week_handler(callback: CallbackQuery):
 async def digest_month_handler(callback: CallbackQuery):
     user = await User.get(id=callback.from_user.id)
     digest = await digest_generator.generate_digest(user.id, days=30)
-    
+    user.last_active = datetime.now()
+    await user.save()
     if "message" in digest:
         await callback.message.edit_text(
             digest["message"],

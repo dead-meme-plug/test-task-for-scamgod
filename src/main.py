@@ -7,6 +7,7 @@ from bot.bot import TGBot
 from services.api_fetcher import APIFetcher
 from services.news_fetcher import NewsFetcher
 from core.database.db import init_db, close_db
+from services.text_analyzer import TextAnalyzer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,8 +26,10 @@ async def main():
     config = BotConfig("src/core/config/config.toml")
     await config.load()
     await init_db(config)
-    api_fetcher = APIFetcher(config.newsapi_key)
+    text_analyzer = TextAnalyzer()
+    api_fetcher = APIFetcher(config.newsapi_key, text_analyzer)
     bot = TGBot(config.telegram_bot_token, api_fetcher)
+    news_fetcher = NewsFetcher(api_fetcher, bot)
     
     try:
         await bot.start()
